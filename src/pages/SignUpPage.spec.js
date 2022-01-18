@@ -1,9 +1,18 @@
 import SignUpPage from './SignUpPage';
-import { render, screen, waitFor } from '@testing-library/react';
+import {
+  render,
+  screen,
+  waitFor,
+  act,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import axios from 'axios';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import i18n from '../locale/i18n';
+import en from '../locale/en.json';
+import tr from '../locale/tr.json';
+import LanguageSelector from '../components/LanguageSelector';
 
 let requestBody;
 let counter = 0;
@@ -31,7 +40,7 @@ describe('Sign up page', () => {
   describe('Layout', () => {
     it('has header', () => {
       render(<SignUpPage />);
-      const header = screen.queryByRole('heading', { name: 'Sign up' });
+      const header = screen.queryByRole('heading', { name: 'Sign Up' });
       expect(header).toBeInTheDocument();
     });
     it('has username input', () => {
@@ -179,7 +188,7 @@ describe('Sign up page', () => {
       expect(button).toBeEnabled();
     });
 
-    // it('displays mismatch message for password repeat input', () => {
+    // it('displays mismatch message for password repeat input', () => {`
     //   setup();
     //   userEvent.type(passwordInput, 'P4ssword');
     //   userEvent.type(passwordRepeatInput, 'AnotherP4ssword');
@@ -203,5 +212,75 @@ describe('Sign up page', () => {
         expect(validationError).not.toBeInTheDocument();
       },
     );
+  });
+
+  describe('Internationalization', () => {
+    let turkishToggle, englishToggle, passwordInput, passwordRepeatInput;
+    const setup = () => {
+      render(
+        <>
+          <SignUpPage />
+          <LanguageSelector />
+        </>,
+      );
+      turkishToggle = screen.getByTitle('Türkçe');
+      englishToggle = screen.getByTitle('English');
+      passwordInput = screen.getByLabelText('Password');
+      passwordRepeatInput = screen.getByLabelText('Password Repeat');
+    };
+
+    afterEach(() => {
+      act(() => {
+        i18n.changeLanguage('en');
+      });
+    });
+
+    it('initially displays all text in English', () => {
+      setup();
+      expect(screen.getByRole('heading', { name: en.signUp })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: en.signUp })).toBeInTheDocument();
+      expect(screen.getByLabelText(en.username)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.email)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.password)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.passwordRepeat)).toBeInTheDocument();
+    });
+
+    it('displays all text in Turkish after changing the language', () => {
+      setup();
+      userEvent.click(turkishToggle);
+
+      expect(screen.getByRole('heading', { name: tr.signUp })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: tr.signUp })).toBeInTheDocument();
+      expect(screen.getByLabelText(tr.username)).toBeInTheDocument();
+      expect(screen.getByLabelText(tr.email)).toBeInTheDocument();
+      expect(screen.getByLabelText(tr.password)).toBeInTheDocument();
+      expect(screen.getByLabelText(tr.passwordRepeat)).toBeInTheDocument();
+    });
+
+    it('displays all text in English after changing back from Turkish', () => {
+      setup();
+
+      userEvent.click(turkishToggle);
+      userEvent.click(englishToggle);
+
+      expect(screen.getByRole('heading', { name: en.signUp })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: en.signUp })).toBeInTheDocument();
+      expect(screen.getByLabelText(en.username)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.email)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.password)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.passwordRepeat)).toBeInTheDocument();
+    });
+
+    it('displays password mismatch validation in Turkish', () => {
+      setup();
+
+      userEvent.click(turkishToggle);
+
+      userEvent.type(passwordInput, 'P4ss');
+      const validationMessageInTurkish = screen.queryByText(
+        tr.passwordMismatchValidation,
+      );
+      expect(validationMessageInTurkish).toBeInTheDocument();
+    });
   });
 });

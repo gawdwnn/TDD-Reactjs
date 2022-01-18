@@ -1,15 +1,16 @@
-import { Component } from "react";
-import Input from "../components/Input";
-import ButtonWithProgress from "../components/ButtonWithProgress";
-import Alert from "../components/Alert";
-import { signUp } from "../api/apiCalls";
+import { Component } from 'react';
+import Input from '../components/Input';
+import ButtonWithProgress from '../components/ButtonWithProgress';
+import Alert from '../components/Alert';
+import { signUp } from '../api/apiCalls';
+import { withTranslation } from 'react-i18next';
 
 class SignUpPage extends Component {
   state = {
-    username: "",
-    email: "",
-    password: "",
-    passwordRepeat: "",
+    username: '',
+    email: '',
+    password: '',
+    passwordRepeat: '',
     apiProgress: false,
     signUpSuccess: false,
     errors: {},
@@ -46,13 +47,15 @@ class SignUpPage extends Component {
   };
 
   render() {
+    const { t } = this.props;
     let disabled = true;
     const { password, passwordRepeat, apiProgress, signUpSuccess, errors } = this.state;
     if (password && passwordRepeat) {
       disabled = password !== passwordRepeat;
     }
-    // let passwordMismatch =
-    //   password !== passwordRepeat ? t("passwordMismatchValidation") : "";
+    let passwordMismatch =
+      password !== passwordRepeat ? t('passwordMismatchValidation') : '';
+
     return (
       <div
         className="col-lg-6 offset-lg-3 col-md-8 offset-md-2"
@@ -61,32 +64,33 @@ class SignUpPage extends Component {
         {!signUpSuccess && (
           <form className="card" data-testid="form-sign-up">
             <div className="card-header">
-              <h1 className="text-center">Sign up</h1>
+              <h1 className="text-center">{t('signUp')}</h1>
             </div>
             <div className="card-body">
               <Input
                 id="username"
-                label={"Username"}
+                label={t('username')}
                 onChange={this.onChange}
                 help={errors.username}
               />
               <Input
                 id="email"
-                label={"E-mail"}
+                label={t('email')}
                 onChange={this.onChange}
                 help={errors.email}
               />
               <Input
                 id="password"
-                label={"Password"}
+                label={t('password')}
                 onChange={this.onChange}
                 help={errors.password}
                 type="password"
               />
               <Input
                 id="passwordRepeat"
-                label={"Password Repeat"}
+                label={t('passwordRepeat')}
                 onChange={this.onChange}
+                help={passwordMismatch}
                 type="password"
               />
               <div className="text-center">
@@ -95,7 +99,7 @@ class SignUpPage extends Component {
                   apiProgress={apiProgress}
                   onClick={this.submit}
                 >
-                  Sign Up
+                  {t('signUp')}
                 </ButtonWithProgress>
               </div>
             </div>
@@ -109,4 +113,6 @@ class SignUpPage extends Component {
   }
 }
 
-export default SignUpPage;
+const SignUpPageWithTranslation = withTranslation()(SignUpPage);
+
+export default SignUpPageWithTranslation;

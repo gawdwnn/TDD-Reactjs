@@ -1,7 +1,15 @@
-import SignUpPage from "./pages/SignUpPage";
+import SignUpPage from './pages/SignUpPage';
+import LanguageSelector from './components/LanguageSelector';
 
 function App() {
-  return <SignUpPage />;
+  return (
+    <>
+      <div className="container pt-3">
+        <SignUpPage />
+        <LanguageSelector />
+      </div>
+    </>
+  );
 }
 
 export default App;
