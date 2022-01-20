@@ -61,8 +61,9 @@ describe('Account Activation Page', () => {
 
   it('displays spinner during activation api call', async () => {
     setup('5678');
-    const spinner = screen.queryByRole('status');
-    expect(spinner).toBeInTheDocument();
+    // const spinner = screen.queryByRole('status');
+    // expect(spinner).toBeInTheDocument();
+    const spinner = screen.getByRole('status');
     await screen.findByText('Activation failure');
     expect(spinner).not.toBeInTheDocument();
   });
