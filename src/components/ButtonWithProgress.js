@@ -1,4 +1,4 @@
-import Spinner from "./Spinner";
+import Spinner from './Spinner';
 
 const ButtonWithProgress = (props) => {
   const { disabled, apiProgress, onClick } = props;
