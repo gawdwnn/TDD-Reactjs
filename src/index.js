@@ -3,14 +3,15 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './locale/i18n';
-import AuthContextWrapper from './state/AuthContextWrapper';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import createStore from './state/store';
 
 ReactDOM.render(
   <Router>
-    <AuthContextWrapper>
+    <Provider store={createStore()}>
       <App />
-    </AuthContextWrapper>
+    </Provider>
   </Router>,
   document.getElementById('root'),
 );
