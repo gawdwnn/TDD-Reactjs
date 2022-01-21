@@ -1,11 +1,10 @@
 import SignUpPage from './SignUpPage';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '../test/setup';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import en from '../locale/en.json';
 import tr from '../locale/tr.json';
-import LanguageSelector from '../components/LanguageSelector';
 
 let requestBody;
 let counter = 0;
@@ -210,12 +209,7 @@ describe('Sign up page', () => {
   describe('Internationalization', () => {
     let turkishToggle, englishToggle, passwordInput, passwordRepeatInput;
     const setup = () => {
-      render(
-        <>
-          <SignUpPage />
-          <LanguageSelector />
-        </>,
-      );
+      render(<SignUpPage />);
       turkishToggle = screen.getByTitle('Türkçe');
       englishToggle = screen.getByTitle('English');
       passwordInput = screen.getByLabelText('Password');

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen } from './test/setup';
 import App from './App';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
@@ -38,7 +38,7 @@ const server = setupServer(
     );
   }),
   rest.post('/api/1.0/auth', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json({ username: 'user5' }));
+    return res(ctx.status(200), ctx.json({ id: 5, username: 'user5' }));
   }),
 );
 
@@ -127,7 +127,7 @@ describe('Routing', () => {
 
   it('displays home page when clicking brand logo', () => {
     setup('/login');
-    const logo = screen.queryByAltText('Hoaxify');
+    const logo = screen.queryByAltText('Testify');
     userEvent.click(logo);
     expect(screen.getByTestId('home-page')).toBeInTheDocument();
   });
@@ -142,13 +142,54 @@ describe('Routing', () => {
 });
 
 describe('Login', () => {
-  it('redirects to homepage after successful login', async () => {
+  const setupLoggedIn = () => {
     setup('/login');
     userEvent.type(screen.getByLabelText('E-mail'), 'user5@mail.com');
     userEvent.type(screen.getByLabelText('Password'), 'P4ssword');
     userEvent.click(screen.getByRole('button', { name: 'Login' }));
+  };
+
+  it('redirects to homepage after successful login', async () => {
+    setupLoggedIn();
     const page = await screen.findByTestId('home-page');
     expect(page).toBeInTheDocument();
+  });
+
+  it('hides Login and Sign Up from navbar after successful login', async () => {
+    setupLoggedIn();
+    await screen.findByTestId('home-page');
+    const loginLink = screen.queryByRole('link', { name: 'Login' });
+    const signUpLink = screen.queryByRole('link', { name: 'Sign Up' });
+    expect(loginLink).not.toBeInTheDocument();
+    expect(signUpLink).not.toBeInTheDocument();
+  });
+
+  it('displays My Profile link on navbar after successful login', async () => {
+    setup('/login');
+    const myProfileLinkBeforeLogin = screen.queryByRole('link', {
+      name: 'My Profile',
+    });
+    expect(myProfileLinkBeforeLogin).not.toBeInTheDocument();
+    userEvent.type(screen.getByLabelText('E-mail'), 'user5@mail.com');
+    userEvent.type(screen.getByLabelText('Password'), 'P4ssword');
+    userEvent.click(screen.getByRole('button', { name: 'Login' }));
+    await screen.findByTestId('home-page');
+    const myProfileLinkAfterLogin = screen.queryByRole('link', {
+      name: 'My Profile',
+    });
+    expect(myProfileLinkAfterLogin).toBeInTheDocument();
+  });
+
+  it('displays user page with logged in user id in url after clicking My Profile link', async () => {
+    setupLoggedIn();
+    await screen.findByTestId('home-page');
+    const myProfile = screen.queryByRole('link', {
+      name: 'My Profile',
+    });
+    userEvent.click(myProfile);
+    await screen.findByTestId('user-page');
+    const username = await screen.findByText('user5');
+    expect(username).toBeInTheDocument();
   });
 });
 
