@@ -1,5 +1,5 @@
 import defaultProfileImage from '../assets/profile.png';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
 import Input from './Input';
 import ButtonWithProgress from './ButtonWithProgress';
@@ -10,18 +10,32 @@ const ProfileCard = (props) => {
   const [inEditMode, setEditMode] = useState(false);
   const [apiProgress, setApiProgress] = useState(false);
   const [newUsername, setNewUsername] = useState(user.username);
+  const dispatch = useDispatch();
 
-  const { id, header } = useSelector((store) => ({
+  const { id, username, header } = useSelector((store) => ({
     id: store.id,
-    header: store.header
+    username: store.username,
+    header: store.header,
   }));
 
   const onClickSave = async () => {
     setApiProgress(true);
     try {
       await updateUser(id, { username: newUsername }, header);
+      setEditMode(false);
+      dispatch({
+        type: 'user-update-success',
+        payload: {
+          username: newUsername,
+        },
+      });
     } catch (error) {}
     setApiProgress(false);
+  };
+
+  const onClickCancel = () => {
+    setEditMode(false);
+    setNewUsername(username);
   };
 
   let content;
@@ -32,19 +46,21 @@ const ProfileCard = (props) => {
         <Input
           label="Change your username"
           id="username"
-          initialValue={user.username}
+          initialValue={newUsername}
           onChange={(event) => setNewUsername(event.target.value)}
         />
         <ButtonWithProgress onClick={onClickSave} apiProgress={apiProgress}>
           Save
         </ButtonWithProgress>{' '}
-        <button className="btn btn-outline-secondary">Cancel</button>
+        <button className="btn btn-outline-secondary" onClick={onClickCancel}>
+          Cancel
+        </button>
       </>
     );
   } else {
     content = (
       <>
-        <h3>{user.username}</h3>
+        <h3>{newUsername}</h3>
         {user.id === id && (
           <button className="btn btn-outline-success" onClick={() => setEditMode(true)}>
             Edit
