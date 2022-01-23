@@ -1,18 +1,20 @@
+import { AUTH } from "./constants";
+
 const reducer = (state, action) => {
-  if (action.type === 'login-success') {
+  if (action.type === AUTH.LOGIN_SUCCESS) {
     return {
       ...state,
       ...action.payload,
       isLoggedIn: true,
     };
-  } else if (action.type === 'user-update-success') {
+  } else if (action.type === AUTH.USER_UPDATE_SUCCESS) {
     return {
       ...state,
       username: action.payload.username,
     };
-  } else if (action.type === 'logout-success') {
+  } else if (action.type === AUTH.LOGOUT_SUCCESS) {
     return {
-      isLoggedIn: false
+      isLoggedIn: false,
     };
   }
   return state;
