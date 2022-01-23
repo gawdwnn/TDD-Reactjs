@@ -2,4 +2,4 @@
 
 Practical Reactjs Test Driven Development
 
-Test - Interactions and Functionalities
+Testing - Layouts, Interactions and Functionalities
