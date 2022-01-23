@@ -1,15 +1,18 @@
-import defaultProfileImage from '../assets/profile.png';
-import { useDispatch, useSelector } from 'react-redux';
-import { useState } from 'react';
-import Input from './Input';
-import ButtonWithProgress from './ButtonWithProgress';
-import { updateUser } from '../api/apiCalls';
+import defaultProfileImage from "../assets/profile.png";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import Input from "./Input";
+import ButtonWithProgress from "./ButtonWithProgress";
+import Modal from "./Modal";
+import { deleteUser, updateUser } from "../api/apiCalls";
 
 const ProfileCard = (props) => {
   const { user } = props;
   const [inEditMode, setEditMode] = useState(false);
-  const [apiProgress, setApiProgress] = useState(false);
+  const [deleteApiProgress, setDeleteApiProgress] = useState(false);
+  const [updateApiProgress, setUpdateApiProgress] = useState(false);
   const [newUsername, setNewUsername] = useState(user.username);
+  const [modalVisible, setModalVisible] = useState(false);
   const dispatch = useDispatch();
 
   const { id, username } = useSelector((store) => ({
@@ -18,23 +21,32 @@ const ProfileCard = (props) => {
   }));
 
   const onClickSave = async () => {
-    setApiProgress(true);
+    setUpdateApiProgress(true);
     try {
       await updateUser(id, { username: newUsername });
       setEditMode(false);
       dispatch({
-        type: 'user-update-success',
+        type: "user-update-success",
         payload: {
           username: newUsername,
         },
       });
     } catch (error) {}
-    setApiProgress(false);
+    setUpdateApiProgress(false);
   };
 
   const onClickCancel = () => {
     setEditMode(false);
     setNewUsername(username);
+  };
+
+  const onClickDelete = async () => {
+    setDeleteApiProgress(true);
+    try {
+      await deleteUser(id);
+    } catch (error) {}
+
+    setDeleteApiProgress(false);
   };
 
   let content;
@@ -48,9 +60,9 @@ const ProfileCard = (props) => {
           initialValue={newUsername}
           onChange={(event) => setNewUsername(event.target.value)}
         />
-        <ButtonWithProgress onClick={onClickSave} apiProgress={apiProgress}>
+        <ButtonWithProgress onClick={onClickSave} apiProgress={updateApiProgress}>
           Save
-        </ButtonWithProgress>{' '}
+        </ButtonWithProgress>{" "}
         <button className="btn btn-outline-secondary" onClick={onClickCancel}>
           Cancel
         </button>
@@ -61,27 +73,49 @@ const ProfileCard = (props) => {
       <>
         <h3>{newUsername}</h3>
         {user.id === id && (
-          <button className="btn btn-outline-success" onClick={() => setEditMode(true)}>
-            Edit
-          </button>
+          <>
+            <div>
+              <button
+                className="btn btn-outline-success"
+                onClick={() => setEditMode(true)}
+              >
+                Edit
+              </button>
+            </div>
+            <div className="pt-2">
+              <button className="btn btn-danger" onClick={() => setModalVisible(true)}>
+                Delete My Account
+              </button>
+            </div>
+          </>
         )}
       </>
     );
   }
 
   return (
-    <div className="card text-center">
-      <div className="card-header">
-        <img
-          src={defaultProfileImage}
-          alt="profile"
-          width="200"
-          height="200"
-          className="rounded-circle shadow"
-        />
+    <>
+      <div className="card text-center">
+        <div className="card-header">
+          <img
+            src={defaultProfileImage}
+            alt="profile"
+            width="200"
+            height="200"
+            className="rounded-circle shadow"
+          />
+        </div>
+        <div className="card-body">{content}</div>
       </div>
-      <div className="card-body">{content}</div>
-    </div>
+      {modalVisible && (
+        <Modal
+          content="Are you sure to delete your account?"
+          onClickCancel={() => setModalVisible(false)}
+          onClickConfirm={onClickDelete}
+          apiProgress={deleteApiProgress}
+        />
+      )}
+    </>
   );
 };
 
