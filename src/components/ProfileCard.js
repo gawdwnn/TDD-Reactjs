@@ -12,16 +12,15 @@ const ProfileCard = (props) => {
   const [newUsername, setNewUsername] = useState(user.username);
   const dispatch = useDispatch();
 
-  const { id, username, header } = useSelector((store) => ({
+  const { id, username } = useSelector((store) => ({
     id: store.id,
     username: store.username,
-    header: store.header,
   }));
 
   const onClickSave = async () => {
     setApiProgress(true);
     try {
-      await updateUser(id, { username: newUsername }, header);
+      await updateUser(id, { username: newUsername });
       setEditMode(false);
       dispatch({
         type: 'user-update-success',
